@@ -1,0 +1,20 @@
+{
+  "albums": [
+    {
+      "title": "My photos new",
+      "id": "a698"
+    },
+    {
+      "title": "Travel Pics old",
+      "id": "b4bc"
+    },
+    {
+      "title": "family pics new",
+      "id": "ace9"
+    },
+    {
+      "id": "a157",
+      "title": "Travel Pics"
+    }
+  ]
+}
