@@ -4,6 +4,9 @@ import React, { useEffect, useState } from "react";
 import { CiEdit } from "react-icons/ci";
 import { MdOutlineDeleteForever } from "react-icons/md";
 import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast, Bounce } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 const AlbumCard: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loadingId, setLoadingId] = useState<number | null>(null);
@@ -19,18 +22,28 @@ const AlbumCard: React.FC = () => {
   }, []);
 
   const handleShowPhotos = (id: number) => {
-    navigate(`/photos/${id}`);
+    navigate(`/album-photos/${id}`);
   };
 
   const handleDelete = async (id: number, e: React.FormEvent) => {
+    toast.error("Album Deleted!", {
+      position: "top-right",
+      autoClose: 3000,
+      hideProgressBar: false,
+      closeOnClick: false,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+      theme: "dark",
+      transition: Bounce,
+    });
     setLoadingId(id);
     console.log(id);
 
     e?.stopPropagation();
     try {
-      const response = await axios.delete(`http://localhost:8000/albums/${id}`);
+      await axios.delete(`http://localhost:8000/albums/${id}`);
       setAlbums((prev) => prev.filter((album) => album.id !== id));
-      console.log("Deleted:", response.data);
     } catch (err) {
       console.error("Error deleting resource:", err);
     } finally {
@@ -44,6 +57,19 @@ const AlbumCard: React.FC = () => {
   };
   return (
     <div className="album-container">
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick={false}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        transition={Bounce}
+      />
       {albums.map((album) => (
         <li
           key={album.id}
@@ -59,12 +85,14 @@ const AlbumCard: React.FC = () => {
               <button
                 className="edit"
                 type="button"
+                title="Delete Album"
                 onClick={(e) => handleEdit(album.id, e)}
               >
                 <CiEdit size={30} />
               </button>
               <button
                 type="button"
+                title="Edit Album"
                 className="delete"
                 onClick={(e) => handleDelete(album.id, e)}
               >

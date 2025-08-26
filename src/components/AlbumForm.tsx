@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate, useParams } from "react-router-dom";
-import { ToastContainer, toast, Bounce } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
-
+import { toast } from "react-toastify";
 const AlbumForm: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [inputValue, setInputValue] = useState<string>("");
+  const [error, setError] = useState<string>("");
 
   // fetching album data
   useEffect(() => {
@@ -20,7 +19,9 @@ const AlbumForm: React.FC = () => {
   }, [id]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputValue(e.target.value);
+    const { value } = e.target;
+    setInputValue(value);
+    validateInput(value);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,31 +31,28 @@ const AlbumForm: React.FC = () => {
         await axios.put(`http://localhost:8000/albums/${id}`, {
           title: inputValue,
         });
-        alert("Album Updated Successfully!");
+        navigate("/", { state: { toast: "album Updated successfully!" } });
       } else {
         await axios.post("http://localhost:8000/albums", {
           title: inputValue,
         });
-
-        toast.success("🦄 Wow so easy!", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
+        // navigating to AlbumList page...
+        navigate("/", { state: { toast: "album created successfully!" } });
       }
+      // resetting the input field
       setInputValue("");
-      navigate("/");
     } catch (err) {
       console.error("Error adding data:", err);
-      alert("Failed to add data.");
+      toast.error("Failed to add data.");
     }
-    // navigating to AlbumList page...
+  };
+
+  const validateInput = (value: string) => {
+    if (!value) {
+      setError("Album Name is required!");
+    } else {
+      setError("");
+    }
   };
   return (
     <div className="form-container">
@@ -65,25 +63,16 @@ const AlbumForm: React.FC = () => {
           placeholder="Enter Album Name"
           name="album"
           id="album"
+          required
+          minLength={3}
+          maxLength={50}
           value={inputValue}
           onChange={handleChange}
         />
-
+        {error && <p style={{ color: "red" }}>{error}</p>}
         <button type="submit">{id ? "update" : "create"}</button>
-        <ToastContainer
-          position="top-center"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick={false}
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-          transition={Bounce}
-        />
       </form>
+       <button className="navigation-btn" onClick={()=>{navigate("/")}}>Back to Album</button>
     </div>
   );
 };
