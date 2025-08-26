@@ -30,7 +30,7 @@ const PhotoList: React.FC = () => {
     setLoadingId(id);
     try {
       await axios.delete(
-        `http://localhost:8000/album-photos?albumId=${id}`
+        `http://localhost:8000/album-photos/${id}`
       );
       setPhotos((prev) => prev.filter((photo) => photo.id !== id));
     } catch (err) {
