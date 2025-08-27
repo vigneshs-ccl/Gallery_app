@@ -55,6 +55,7 @@ const AlbumsList: React.FC = () => {
             <IoMdAdd />
           </h4>
         </div>
+        
         <AlbumCard />
       </main>
     </div>

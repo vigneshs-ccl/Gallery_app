@@ -1,28 +1,45 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { Bounce, toast, ToastContainer } from "react-toastify";
+import { Bounce, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ImageUploading from "react-images-uploading";
+import type { ImageListType } from "react-images-uploading";
+import type { Photo } from "../assets/Photo.model";
 
 const PhotoForm: React.FC = () => {
-  const { id } = useParams<{ id: string }>(); // albumId
+  const { albumId, photoId } = useParams<{
+    albumId: string;
+    photoId?: string;
+  }>();
   const navigate = useNavigate();
-  const [title, setTitle] = useState("");
-  const [file, setFile] = useState<File | null>(null);
 
-  // Convert file → base64 string
-  const toBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = (error) => reject(error);
-    });
+  const [title, setTitle] = useState("");
+  const [images, setImages] = useState([]);
+  const [existingUrl, setExistingUrl] = useState<string | null>(null);
+  const maxNumber = 1;
+
+  // Load existing photo if editing
+  useEffect(() => {
+    if (photoId) {
+      axios
+        .get<Photo>(`http://localhost:8000/album-photos/${photoId}`)
+        .then((res) => {
+          setTitle(res.data.title);
+          setExistingUrl(res.data.url);
+        })
+        .catch((err) => console.error("Error loading photo:", err));
+    }
+  }, [photoId]);
+
+  const onChange = (imageList: ImageListType) => {
+    setImages(imageList as never[]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!title || !file) {
+
+    if (!title || (!existingUrl && images.length === 0)) {
       toast.error("Please add a title and upload an image", {
         transition: Bounce,
       });
@@ -30,30 +47,41 @@ const PhotoForm: React.FC = () => {
     }
 
     try {
-      const base64Url = await toBase64(file);
-
-      const newPhoto = {
-        id: crypto.randomUUID(), // unique id
-        albumId: id,
+      const photoData: Photo = {
+        id: photoId ? photoId : crypto.randomUUID(),
+        albumId: albumId!,
         title,
-        url: base64Url, // base64 image stored in db.json
+        url: images[0]?.dataURL ?? existingUrl!, // use new image if uploaded, otherwise old one
       };
 
-      await axios.post("http://localhost:8000/album-photos", newPhoto);
+      if (photoId) {
+        // Update existing
+        await axios.put(
+          `http://localhost:8000/album-photos/${photoId}`,
+          photoData
+        );
+      } else {
+        // Add new
+        await axios.post("http://localhost:8000/album-photos", photoData);
+      }
 
-      toast.success("Photo added successfully!", { transition: Bounce });
-      navigate(`/album-photos/${id}`); // navigate back to album photos
-    } catch (error) {
-      console.error("Error adding photo:", error);
-      toast.error("Failed to add photo", { transition: Bounce });
+      navigate(`/album-photos/${albumId}`, {
+        state: {
+          toastMessage: photoId
+            ? "Photo Updated Successfully!"
+            : "Photo Added Successfully!",
+        },
+      });
+    } catch (err) {
+      console.error("Error saving photo:", err);
+      toast.error("Failed to save photo", { transition: Bounce });
     }
   };
 
   return (
     <div className="form-container">
-      <ToastContainer />
       <form onSubmit={handleSubmit} className="photo-form">
-        <h2>Add Photo</h2>
+        <h2>{photoId ? "Edit Photo" : "Add Photo"}</h2>
         <input
           type="text"
           placeholder="Photo Title"
@@ -61,17 +89,63 @@ const PhotoForm: React.FC = () => {
           onChange={(e) => setTitle(e.target.value)}
           required
         />
-        <input
-          type="file"
-          className="file-input"
-          accept="image/*"
-          onChange={(e) => setFile(e.target.files?.[0] || null)}
-          required
-        />
-        <button type="submit">Add Photo</button>
-        
+
+        {existingUrl && images.length === 0 && (
+          <div className="preview">
+            <p>Current Image:</p>
+            <img src={existingUrl} alt="preview" width={150} />
+          </div>
+        )}
+
+        <ImageUploading
+          value={images}
+          onChange={onChange}
+          maxNumber={maxNumber}
+          dataURLKey="dataURL"
+        >
+          {({
+            imageList,
+            onImageUpload,
+            isDragging,
+            dragProps,
+            onImageRemoveAll,
+            onImageUpdate,
+          }) => (
+            <div className="upload-image-wrapper">
+              <button
+                type="button"
+                style={isDragging ? { color: "red" } : undefined}
+                onClick={onImageUpload}
+                {...dragProps}
+              >
+                {photoId ? "Change Image" : "Click or Drag to Upload"}
+              </button>
+              {imageList.map((image, index) => (
+                <div key={index} className="image-item">
+                  <img src={image.dataURL} alt="" width="170" />
+                  <div className="image-item-btn-wrapper">
+                    <button type="button" onClick={() => onImageUpdate(index)}>
+                      Update
+                    </button>
+                    <button type="button" onClick={() => onImageRemoveAll()}>
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </ImageUploading>
+
+        <button type="submit">{photoId ? "Update Photo" : "Add Photo"}</button>
       </form>
-      <button onClick={()=>navigate(`/album-photos/${id}`)} className="navigation-btn">Back to Photos</button>
+
+      <button
+        onClick={() => navigate(`/album-photos/${albumId}`)}
+        className="navigation-btn"
+      >
+        Back to Photos
+      </button>
     </div>
   );
 };

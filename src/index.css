@@ -368,61 +368,81 @@ header ul li a:hover {
   height: 100vh;
   justify-content: center;
   align-items: center;
+  flex-direction: column; /* stack form + back button */
+  gap: 20px;
 }
 
+/* Glassmorphic form box */
 .photo-form {
   color: #fff;
-  height: 400px;
+  min-height: 200px;
+  height: auto;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start; /* top-down content */
   align-items: center;
+  gap: 20px; /* space between elements */
   background-color: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.1);
   width: 500px;
   border-radius: 15px;
   padding: 32px;
   backdrop-filter: blur(10px);
-  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease;
-}
-
-.photo-form:hover {
-  transform: scale(1.05);
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
-}
-
-.photo-form .file-input {
-  width: 280px;
-  padding: 10px;
-  height: 50px;
-}
-
-.photo-form input {
-  background-color: rgba(255, 255, 255, 0.116);
-  /* backdrop-filter: blur(10px); */
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 8px; /* Rounded corners */
-  padding: 10px 15px; /* Adjust padding as needed */
-  color: rgba(255, 255, 255, 0.8); /* Text color for readability */
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  height: 50px;
-  font-size: 20px;
-  width: 400px;
+  transition: all 0.3s ease-in-out;
   text-align: center;
 }
 
+.photo-form:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5);
+}
+
+
+/* Input fields */
+.photo-form input {
+  background-color: rgba(255, 255, 255, 0.116);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px 15px;
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 50px;
+  font-size: 18px;
+  width: 100%;
+  max-width: 400px;
+  text-align: center;
+}
+
+/* Upload wrapper */
+.upload-image-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+}
+
+/* Uploaded image preview */
+.image-item img {
+  display: block;
+  margin: 0 auto;
+  border-radius: 10px;
+  max-width: 200px;
+  height: auto;
+  object-fit: cover;
+  box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+}
+
+/* Buttons inside form */
 .photo-form button {
-  display: inline-block;
-  padding: 15px 32px;
+  padding: 12px 24px;
   border: 0;
-  text-decoration: none;
-  border-radius: 15px;
+  border-radius: 12px;
   background-color: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(30px);
-  color: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(20px);
+  color: rgba(255, 255, 255, 0.9);
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 1px;
   cursor: pointer;
   text-transform: uppercase;
   transition: all 0.3s;
@@ -432,8 +452,28 @@ header ul li a:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
 
-.photo-form h1 {
-  color: white;
+/* Image update/remove buttons in a row */
+.image-item-btn-wrapper {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+/* Back button under form */
+.navigation-btn {
+  padding: 12px 24px;
+  border-radius: 12px;
+  background-color: rgba(0, 255, 255, 0.15);
+  border: 1px solid rgba(0, 255, 255, 0.3);
+  color: #fff;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.navigation-btn:hover {
+  background-color: rgba(0, 255, 255, 0.25);
 }
 
 .album-navigation,
@@ -458,4 +498,22 @@ header ul li a:hover {
 ::placeholder {
   color: white;
   opacity: 1; /* Firefox */
+}
+
+/* search input styles */
+.search-container {
+  margin: 20px 0px;
+}
+
+.search-input {
+  background-color: rgba(255, 255, 255, 0.116);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px; /* Rounded corners */
+  padding: 10px 15px; /* Adjust padding as needed */
+  color: rgba(255, 255, 255, 0.8); /* Text color for readability */
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  height: 50px;
+  font-size: 20px;
+  width: 400px;
+  text-align: center;
 }

@@ -5,9 +5,9 @@ const Header = () => {
         <h1 className="">My Gallery</h1>
         <ul>
           <li>
-            <a href="#" className="">
+            {/* <a href="#" className="">
               About
-            </a>
+            </a> */}
           </li>
         </ul>
       </header>

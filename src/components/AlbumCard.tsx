@@ -11,15 +11,27 @@ const AlbumCard: React.FC = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
+  const [query, setQuery] = useState<string>("");
   const navigate = useNavigate();
+
+  const fetchAlbums = async () => {
+    try {
+      const response = await axios.get<Album[]>("http://localhost:8000/albums");
+      setAlbums(response.data);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
+  // Fetch all posts on first render
   useEffect(() => {
-    axios
-      .get("http://localhost:8000/albums")
-      .then((response) => setAlbums(response.data))
-      .catch((error) => {
-        console.error("Error fetching data:", error); // Handle errors
-      });
+    fetchAlbums();
   }, []);
+
+  // search filter
+  const filteredAlbums = albums.filter((album) =>
+    album.title.toLowerCase().includes(query.toLowerCase())
+  );
 
   const handleShowPhotos = (id: number) => {
     navigate(`/album-photos/${id}`);
@@ -38,7 +50,6 @@ const AlbumCard: React.FC = () => {
       transition: Bounce,
     });
     setLoadingId(id);
-    console.log(id);
 
     e?.stopPropagation();
     try {
@@ -56,53 +67,70 @@ const AlbumCard: React.FC = () => {
     navigate(`/album/edit/${id}`);
   };
   return (
-    <div className="album-container">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick={false}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="dark"
-        transition={Bounce}
-      />
-      {albums.map((album) => (
-        <li
-          key={album.id}
-          className="album-card"
-          onClick={() => handleShowPhotos(album.id)}
-        >
-          {loadingId === album.id ? (
-            <div className="spinner">⏳ Deleting...</div>
-          ) : (
-            <>
-              <h1 className="text-white">{album.title}</h1>
+    <>
+      {/* search functionality for album */}
+      <div className="search-container">
+        <input
+          className="search-input"
+          type="text"
+          placeholder="Search Album"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+      </div>
+      <div className="album-container">
+        <ToastContainer
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick={false}
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="dark"
+          transition={Bounce}
+        />
 
-              <button
-                className="edit"
-                type="button"
-                title="Delete Album"
-                onClick={(e) => handleEdit(album.id, e)}
-              >
-                <CiEdit size={30} />
-              </button>
-              <button
-                type="button"
-                title="Edit Album"
-                className="delete"
-                onClick={(e) => handleDelete(album.id, e)}
-              >
-                <MdOutlineDeleteForever size={30} />
-              </button>
-            </>
-          )}
-        </li>
-      ))}
-    </div>
+        {filteredAlbums.length > 0 ? (
+          filteredAlbums.map((album) => (
+            <li
+              key={album.id}
+              className="album-card"
+              onClick={() => handleShowPhotos(album.id)}
+            >
+              {loadingId === album.id ? (
+                <div className="spinner">⏳ Deleting...</div>
+              ) : (
+                <>
+                  <h1 className="text-white">{album.title}</h1>
+
+                  <button
+                    className="edit"
+                    type="button"
+                    title="Edit Album"
+                    onClick={(e) => handleEdit(album.id, e)}
+                  >
+                    <CiEdit size={30} />
+                  </button>
+                  <button
+                    type="button"
+                    title="Delete Album"
+                    className="delete"
+                    onClick={(e) => handleDelete(album.id, e)}
+                  >
+                    <MdOutlineDeleteForever size={30} />
+                  </button>
+                </>
+              )}
+            </li>
+          ))
+        ) : (
+          <p>NO ITEMS FOUND</p>
+        )}
+      </div>
+    </>
   );
 };
 

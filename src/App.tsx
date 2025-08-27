@@ -14,8 +14,14 @@ function App() {
         <Route path="/album/create" element={<AlbumForm />} />
         <Route path="/album/edit/:id" element={<AlbumForm />} />
         <Route path="/album-photos/:id" element={<PhotoList />} />
-        <Route path="/album-photos/:id/add-photo" element={<PhotoForm/>}/>
-        <Route path="/album-photos/:id/add-photo/:id"/>
+        <Route
+          path="/album-photos/:albumId/add-photo"
+          element={<PhotoForm />}
+        />
+        <Route
+          path="/album-photos/:albumId/edit-photo/:photoId"
+          element={<PhotoForm />}
+        />
       </Routes>
 
       <ToastContainer
